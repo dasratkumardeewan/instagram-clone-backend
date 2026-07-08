@@ -246,11 +246,34 @@ const updateUserInfo = asyncHandler(async (req, res) => {
 
 })
 
+const changeCurrentEmail = asyncHandler(async (req, res) => {
+    const { password, email } = req.body
+
+    if ([password, email].some((field) => !field || field.trim() === "")) {
+        throw new ApiError(400, `All fields are required`)
+    }
+
+    const user = await User.findById(req.user._id)
+
+    const isPasswordValid = await user.isPasswordCorrect(password)
+    if (!isPasswordValid) {
+        throw new ApiError(409, "Invalid Credentials")
+    }
+
+    user.email = email
+    await user.save()
+
+    return res.status(200).json(
+        new ApiResponse(200, user, "User email updated successfully")
+    )
+})
+
 export {
     registerUser,
     loginUser,
     logout,
     refreshAccessToken,
     changeCurrentPassword,
-    updateUserInfo
+    updateUserInfo,
+    changeCurrentEmail
 }
