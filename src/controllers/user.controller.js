@@ -311,6 +311,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 })
 
+// fixed 
+
 export {
     registerUser,
     loginUser,
