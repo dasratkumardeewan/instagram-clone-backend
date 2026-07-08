@@ -209,10 +209,48 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
     )
 })
 
+const updateUserInfo = asyncHandler(async (req, res) => {
+    const { bio, fullName, username } = req.body
+
+    if (!(bio || fullName || username)) {
+        throw new ApiError(400, "Atleast one field is must to be provided")
+    }
+    const fieldsToBeUpdated = {}
+
+    if (bio) {
+        fieldsToBeUpdated.bio = bio
+    }
+    if (fullName) {
+        fieldsToBeUpdated.fullName = fullName
+    }
+
+    if (username) {
+        const existedUserWithUsername = await User.findOne({ username })
+
+        if (existedUserWithUsername) {
+            throw new ApiError(400, "Username is already taken ")
+        }
+        fieldsToBeUpdated.username = username
+    }
+
+    const user = await User.findByIdAndUpdate(req.user._id, {
+        $set: fieldsToBeUpdated
+    }, {
+        new: true
+    })
+
+    return res.status(200).json(
+        new ApiResponse(200, user, "User info updated successfully")
+    )
+
+
+})
+
 export {
     registerUser,
     loginUser,
     logout,
     refreshAccessToken,
-    changeCurrentPassword
+    changeCurrentPassword,
+    updateUserInfo
 }
