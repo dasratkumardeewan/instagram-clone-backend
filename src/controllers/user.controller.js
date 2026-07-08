@@ -311,8 +311,13 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 })
 
-// fixed 
+const deleteAccount = asyncHandler(async (req, res) => {
+    const user = await User.findByIdAndDelete(req.user._id)
 
+    return res.status(200).json(
+        new ApiResponse(200, { userId: user._id }, "Account deleted successfully")
+    )
+})
 export {
     registerUser,
     loginUser,
@@ -322,5 +327,6 @@ export {
     updateUserInfo,
     changeCurrentEmail,
     updateProfileImage,
-    getCurrentUser
+    getCurrentUser,
+    deleteAccount
 }
