@@ -254,6 +254,12 @@ const changeCurrentEmail = asyncHandler(async (req, res) => {
         throw new ApiError(400, `All fields are required`)
     }
 
+    const existedUserWithEmail = await User.findOne({ email })
+
+    if (existedUserWithEmail) {
+        throw new ApiError(400, "User with this email already exists")
+    }
+
     const user = await User.findById(req.user._id)
 
     const isPasswordValid = await user.isPasswordCorrect(password)
@@ -295,6 +301,16 @@ const updateProfileImage = asyncHandler(async (req, res) => {
     )
 })
 
+const getCurrentUser = asyncHandler(async (req, res) => {
+
+    const user = await User.findById(req.user._id).select()
+
+    return res.status(200).json(
+        new ApiResponse(200, user, "User fetched Successfully")
+    )
+
+})
+
 export {
     registerUser,
     loginUser,
@@ -303,5 +319,6 @@ export {
     changeCurrentPassword,
     updateUserInfo,
     changeCurrentEmail,
-    updateProfileImage
+    updateProfileImage,
+    getCurrentUser
 }
