@@ -6,6 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
 import config from "../config/config.js";
+import { v2 as cloudinary } from "cloudinary"
 
 const generateAccessAndRefreshToken = async (userId) => {
     try {
@@ -268,6 +269,32 @@ const changeCurrentEmail = asyncHandler(async (req, res) => {
     )
 })
 
+const updateProfileImage = asyncHandler(async (req, res) => {
+    const profileImageLocalPath = req.file?.path
+
+    if (!profileImageLocalPath) {
+        throw new ApiError(400, "Profile Image is missing")
+    }
+
+    const profileImage = await uploadOnCloudinary(profileImageLocalPath)
+
+    if (!profileImage) {
+        throw new ApiError(500, "Something went wrong while uploading your image")
+    }
+
+    const user = await User.findById(req.user._id)
+    // console.log(user.profileImage.public_id)
+    await cloudinary.uploader.destroy(user.profileImage.public_id)
+
+    user.profileImage.url = profileImage.secure_url
+    user.profileImage.public_id = profileImage.public_id
+    user.save()
+
+    return res.status(200).json(
+        new ApiResponse(200, user, "Profile Image updated successfully")
+    )
+})
+
 export {
     registerUser,
     loginUser,
@@ -275,5 +302,6 @@ export {
     refreshAccessToken,
     changeCurrentPassword,
     updateUserInfo,
-    changeCurrentEmail
+    changeCurrentEmail,
+    updateProfileImage
 }
