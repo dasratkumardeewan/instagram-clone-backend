@@ -62,11 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
         fullName,
         email,
         password,
-        profileImage: {
-            url: profileImage.secure_url,
-            public_id: profileImage.public_id
-        },
-        bio,
+        bio: bio || "",
         isVerified: true
     })
 
@@ -290,7 +286,7 @@ const updateProfileImage = asyncHandler(async (req, res) => {
 
     const user = await User.findById(req.user._id)
     // console.log(user.profileImage.public_id)
-    await cloudinary.uploader.destroy(user.profileImage.public_id)
+    // await cloudinary.uploader.destroy(user.profileImage.public_id)
 
     user.profileImage.url = profileImage.secure_url
     user.profileImage.public_id = profileImage.public_id
